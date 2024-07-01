@@ -1,0 +1,6 @@
+import os
+
+SERP_API_KEY = os.getenv('SERP_API_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+SYMBOLIC_AI_ENGINE = 'gpt-4'
+SECURITIES = ['AAPL', 'GOOGL', 'AMZN']
