@@ -1,16 +1,37 @@
-# This is a sample Python script.
+from config import SYMBOLIC_AI_ENGINE
+from news_retriever import NewsRetriever
+from news_analyzer import NewsAnalyzer
+from result_saver import ResultSaver
+from utils import get_security_tickers
+from symai import *
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+# from symai.backend.engine_gptX_chat import GPTXChatEngine
+#
+# custom_engine = GPTXChatEngine()
+# custom_engine.model = SYMBOLIC_AI_ENGINE
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+def main():
+    # Expression.setup(engines={'neurosymbolic': custom_engine})
+
+    securities = get_security_tickers()
+    news_retriever = NewsRetriever()
+    news_analyzer = NewsAnalyzer()
+    result_saver = ResultSaver()
+
+    all_signals = []
+
+    for ticker in securities:
+        news_articles = news_retriever.fetch_news(ticker)
+        if not news_articles:
+            print(f"No news found for {ticker}")
+            continue
+        signals = news_analyzer.evaluate_news(ticker, news_articles, news_retriever)
+        all_signals.extend(signals)
+        result_saver.save_to_json(ticker, news_articles)
+
+    result_saver.save_to_excel(all_signals)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    main()
