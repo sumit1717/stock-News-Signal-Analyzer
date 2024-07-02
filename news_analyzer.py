@@ -1,11 +1,40 @@
 import symai as ai
 from symai import *
 from config import SYMBOLIC_AI_ENGINE, OPENAI_API_KEY
+import re
 
 
 class NewsAnalyzer:
     def __init__(self):
         self.engine = ai.Engine()
+
+
+    def preprocess_content(self, content):
+
+        # Remove common boilerplate text and ads
+        patterns = [
+            r'Read more:',  # Example boilerplate pattern
+            r'Subscribe to our newsletter',  # Another example
+            r'Follow us on',  # Social media follow prompts
+            r'Advertisement',  # Advertisements
+            r'Click here for more',  # Clickbait
+            r'© [0-9]{4}.*',  # Copyright lines
+            r'All rights reserved',  # Legal disclaimers
+            r'\d+ Comments',  # Comments section
+            r'^\s*$',  # Empty lines
+            r'\b[A-Z]{2,}\b',  # All-caps words (often acronyms or noise)
+            r'\b\w{1,2}\b'  # Very short words (often noise)
+        ]
+        for pattern in patterns:
+            content = re.sub(pattern, '', content, flags=re.IGNORECASE)
+
+        # remove lines that are too short or too long
+        cleaned_lines = []
+        for line in content.split('\n'):
+            line = line.strip()
+            if 50 < len(line) < 500:
+                cleaned_lines.append(line)
+        return ' '.join(cleaned_lines)
 
     def evaluate_news(self, security_ticker, news_articles, retriever):
         signals = []
@@ -17,6 +46,10 @@ class NewsAnalyzer:
             if not news_content:
                 continue
 
+            # Preprocess the content to remove noise
+            news_content = self.preprocess_content(news_content)
+
+            # Using symbolica for summarization
             summary_query = f"Summarize the following article news_content: {news_content}"
             try:
                 summary_query_symbol = Symbol(summary_query)
