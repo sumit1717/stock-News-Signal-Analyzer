@@ -49,6 +49,10 @@ class NewsAnalyzer:
             # Preprocess the content to remove noise
             news_content = self.preprocess_content(news_content)
 
+            # Ensure the news content length is within acceptable limits for openAI
+            if len(news_content) > 5000:
+                news_content = news_content[:5000]
+
             # Using symbolica for summarization
             summary_query = f"Summarize the following article news_content: {news_content}"
             try:
